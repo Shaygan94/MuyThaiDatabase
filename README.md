@@ -2,39 +2,54 @@
 A personal Java project inspired by the 2025 Java exam. It manages Muay Thai fighters, clubs, cities, and countries with file and database integration, featuring an admin menu for secure data management and input validation.
 
 ThaiBoxingDatabase
-This is a custom Java project inspired by the Java 2025 exam, designed to manage and organize Muay Thai (Thai boxing) data including countries, cities, clubs, and fighters. It demonstrates advanced handling of relational data with a clean, modular architecture.
+A Java project inspired by the 2025 Java exam, designed to manage Muay Thai data — countries, cities, clubs, and fighters — with a combination of file-based data handling and MySQL database integration.
 
-Key Features
-Comprehensive Data Model: Represents countries, cities, Muay Thai clubs, and fighters with fully linked relational tables.
+📄 About
+The application reads and writes data related to Thai boxing: countries, cities, Muay Thai clubs, and fighters. It supports adding new entries interactively via an Admin Menu that updates existing text files or creates new ones as needed to persist the data.
 
-Admin Menu Interface: Allows users to add new countries, cities, clubs, and fighters interactively through an admin menu.
+The backend uses JDBC to connect to a MySQL database, leveraging a structured relational schema with proper keys and constraints. The project is built with Maven for dependency management and uses the MySQL Connector/J version 8.0.30 for database connectivity.
 
-File-Based Data Management: When adding or updating data, the program writes changes to existing text files or creates new ones when needed, ensuring data persistence outside the database.
+💡 Key Features
+Interactive Admin Menu for adding countries, cities, clubs, and fighters.
 
-Dynamic File-Based Data Import: Automatically reads from external files to populate and update the database, allowing easy data expansion without manual SQL inserts.
+Automatic update and creation of structured text files to reflect changes in the data.
 
-JDBC Integration: Uses JDBC with MySQL to connect and manipulate the database programmatically.
+Reads data from text files and imports into a MySQL database via JDBC.
 
-Maven Project Setup: Structured with Maven for dependency management and easy build.
+Well-defined database schema with primary keys, foreign keys, and relational integrity.
 
-Robust Data Integrity: Implements primary keys, unique constraints, and foreign key relationships to ensure data consistency.
+Clean Maven project structure, easy to build and extend.
 
-Scalable Design: Easily extendable to support more features or data entities.
+Uses MySQL Connector/J 8.0.30 to ensure compatibility with MySQL Workbench and the database.
 
-Getting Started
-Database Setup
-Run the SQL script thaiboxingdatabase.sql located in the root folder to create the database schema with all necessary tables and constraints. This file contains the database structure only (no preloaded data).
+⚙️ Technologies Used
+Java 17+
 
-Create a db.properties file in the project root directory with the following content:
+Maven
+
+JDBC
+
+MySQL Workbench
+
+IntelliJ IDEA (recommended)
+
+MySQL Connector/J 8.0.30
+
+▶️ How to Run
+Database setup:
+Run the SQL script thaiboxingdatabase.sql (located in the root folder) to create the database schema with all tables and relationships.
+Note: This script contains the database structure only — no data included.
+
+Project setup:
+Open the folder ThaiBoxingDatabase-Test in IntelliJ IDEA to ensure the correct project structure and file path resolution.
+
+Create the database connection properties:
+In the root directory, create a file named db.properties with the following content (replace placeholders with your actual credentials):
 db.url=jdbc:mysql://localhost:3306/thaiboxingdatabase
 db.user=YOUR_DB_USERNAME
 db.password=YOUR_DB_PASSWORD
-**Replace YOUR_DB_USERNAME and YOUR_DB_PASSWORD with your actual MySQL credentials.**
+Ensure compatible MySQL Connector:
+The project uses MySQL Connector/J version 8.0.30, included in lib/mysql-connector-java-8.0.30.jar. Make sure your MySQL Workbench and connector driver match this version.
 
-Project Setup
-Open the folder named ThaiBoxingDatabase-Test in IntelliJ IDEA to ensure the project structure is correctly recognized.
-
-The project uses JDBC MySQL Connector version 8.0.30. Please ensure your MySQL Workbench and MySQL Connector/J driver matches this version for compatibility.
-
-The connector .jar file is included in the lib directory:
-lib/mysql-connector-java-8.0.30.jar
+Run the application:
+Launch the Main class in your IDE to start the program. Use the Admin Menu to manage data interactively.
