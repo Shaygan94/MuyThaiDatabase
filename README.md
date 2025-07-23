@@ -45,9 +45,13 @@ The backend uses JDBC to connect to a MySQL database, leveraging a structured re
 
 3. **Create the database connection properties:**  
    In the root directory, create a file named `db.properties` with the following content (replace placeholders with your actual credentials):
+
    db.url=jdbc:mysql://localhost:3306/thaiboxingdatabase
+
    db.user=YOUR_DB_USERNAME
+
    db.password=YOUR_DB_PASSWORD
+
 Ensure compatible MySQL Connector:
 The project uses MySQL Connector/J version 8.0.30, included in lib/mysql-connector-java-8.0.30.jar. Make sure your MySQL Workbench and connector driver match this version.
 
