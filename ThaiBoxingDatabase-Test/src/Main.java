@@ -7,13 +7,14 @@ public class Main {
         try {
             initializer.initializeApplication();
             Menu menu = new Menu(
+                    initializer.getFileHandler(),
                     initializer.getFighterRepository(),
                     initializer.getThaiClubRepository(),
                     initializer.getCityRepository(),
                     initializer.getCountryRepository(),
                     initializer.getClubsInCitiesRepository()
             );
-            menu.menu(); // Starter menyen etter at alt er lastet inn
+            menu.menu();
         } catch (SQLException e) {
             System.out.println("Database error: " + e.getMessage());
             e.printStackTrace();

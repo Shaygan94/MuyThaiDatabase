@@ -26,43 +26,42 @@ public class FighterRepository {
         }
     }
 
-   public List<FighterDb> getFightersByCountryCode(String code) throws SQLException{
+    public List<FighterDb> getFightersByCountryCode(String code) throws SQLException {
         List<FighterDb> fighters = new ArrayList<>();
-       try (PreparedStatement ps = con.prepareStatement(SqlQueries.GET_FIGHTERS_BY_COUNTRYCODE)) {
-           ps.setString(1, code);
-           ResultSet rs = ps.executeQuery();
-           while (rs.next()) {
-               fighters.add(new FighterDb(
-                       rs.getInt("idClub"),
-                       rs.getString("fighterName"),
-                       rs.getString("fighterStyle"),
-                       rs.getInt("height_In_Cm"),
-                       rs.getInt("weight_In_Kg"),
-                       rs.getDate("age").toLocalDate(),
-                       rs.getString("codeCountry")
-               ));
-           }
-       }
+        try (PreparedStatement ps = con.prepareStatement(SqlQueries.GET_FIGHTERS_BY_COUNTRYCODE)) {
+            ps.setString(1, code);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                fighters.add(new FighterDb(
+                        rs.getInt("idClub"),
+                        rs.getString("fighterName"),
+                        rs.getString("fighterStyle"),
+                        rs.getInt("height_In_Cm"),
+                        rs.getInt("weight_In_Kg"),
+                        rs.getDate("age").toLocalDate(),
+                        rs.getString("codeCountry")
+                ));
+            }
+        }
         return fighters;
-   }
+    }
 
-   public List<FighterDb> getFightersByClubName(String clubName) throws SQLException{
+    public List<FighterDb> getFightersByClubName(String clubName) throws SQLException {
         List<FighterDb> fighters = new ArrayList<>();
-       try (PreparedStatement ps = con.prepareStatement(SqlQueries.GET_FIGHTERS_BY_CLUBNAME)) {
-           ps.setString(1, clubName);
-           ResultSet rs = ps.executeQuery();
-           while (rs.next()) {
-               fighters.add(new FighterDb(
-                       rs.getInt("idClub"),
-                       rs.getString("fighterName"),
-                       rs.getString("fighterStyle"),
-                       rs.getInt("height_In_Cm"),
-                       rs.getInt("weight_In_Kg"),
-                       rs.getDate("age").toLocalDate(),
-                       rs.getString("codeCountry")));
-           }
-       }
+        try (PreparedStatement ps = con.prepareStatement(SqlQueries.GET_FIGHTERS_BY_CLUBNAME)) {
+            ps.setString(1, clubName);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                fighters.add(new FighterDb(
+                        rs.getInt("idClub"),
+                        rs.getString("fighterName"),
+                        rs.getString("fighterStyle"),
+                        rs.getInt("height_In_Cm"),
+                        rs.getInt("weight_In_Kg"),
+                        rs.getDate("age").toLocalDate(),
+                        rs.getString("codeCountry")));
+            }
+        }
         return fighters;
-   }
-
+    }
 }

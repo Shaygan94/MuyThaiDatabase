@@ -9,19 +9,22 @@ public class AdminMenu {
     private ThaiClubRepository thaiClubRepository;
     private CityRepository cityRepository;
     private CountryRepository countryRepository;
-    private ClubsInCitiesRepository clubsInCitiesRepository;;
+    private ClubsInCitiesRepository clubsInCitiesRepository;
     private FileHandler fileHandler;
+    private MenuUtils menuUtils;
 
     public AdminMenu(FighterRepository fighterRepository, ThaiClubRepository thaiClubRepository, CityRepository cityRepository, CountryRepository countryRepository, ClubsInCitiesRepository clubsInCitiesRepository, FileHandler fileHandler) {
+        this.menuUtils = new MenuUtils(countryRepository, cityRepository, thaiClubRepository, clubsInCitiesRepository, fighterRepository, fileHandler);
         this.fighterRepository = fighterRepository;
         this.thaiClubRepository = thaiClubRepository;
         this.cityRepository = cityRepository;
         this.countryRepository = countryRepository;
         this.clubsInCitiesRepository = clubsInCitiesRepository;
         this.fileHandler = fileHandler;
+
     }
 
-   public void start(Scanner scan) {
+    public void start(Scanner scan) {
         int choice = 0;
         while (choice != 2) {
             System.out.println("\n --- Admin Menu ---");
@@ -43,156 +46,90 @@ public class AdminMenu {
             }
         }
 
-   }
+    }
 
     private void addNewFighter(Scanner scan) {
         try {
+
             Set<String> codeCountryList = fileHandler.getAllCountryCodes("country.txt");
-
-            String chosenCountryCode = promptForCountryCode(scan, codeCountryList);
-
+            String chosenCountryCode = menuUtils.promptForCode(scan, codeCountryList, "country",
+                    Messages.INVALID_CCODE + Messages.TYPE_LIST_COCODES);
 
             if (!codeCountryList.contains(chosenCountryCode)) {
-                Country newCountry = createNewCountry(scan, chosenCountryCode);
-                saveNewCountry(newCountry);
+                Country newCountry = menuUtils.createNewCountry(scan, chosenCountryCode);
+                menuUtils.saveNewCountry(newCountry);
                 codeCountryList.add(chosenCountryCode);
             }
-
 
             List<String> cityFiles = fileHandler.getAllCityFiles(".");
             Set<String> codeCityList = fileHandler.getAllCityCodes(cityFiles.toArray(new String[0]));
 
-            String chosenCityCode = promptForCityCode(scan, codeCityList);
+            String chosenCityCode = menuUtils.promptForCode(scan, codeCityList, "city",
+                    Messages.INVALID_CICODE + Messages.TYPE_LIST_CICODES);
 
-            if(!codeCityList.contains(chosenCityCode)) {
-                City newCity = createNewCity(scan, chosenCityCode, chosenCountryCode);
-                saveNewCity(newCity);
+            if (!codeCityList.contains(chosenCityCode)) {
+                City newCity = menuUtils.createNewCity(scan, chosenCityCode, chosenCountryCode);
+                menuUtils.saveNewCity(newCity);
                 codeCityList.add(chosenCityCode);
             }
 
+            Set<String> clubNames = fileHandler.getAllClubNames("thaiboxingClubs.txt");
+            String chosenClubName = menuUtils.promptForClubName(scan, clubNames).trim();
 
-        } catch (IOException e) {
-            System.out.println("Error reading file country.txt: " + e.getMessage());;
-        }
-    }
+            String normalizedClubName = clubNames.stream()
+                    .filter(name -> name.equalsIgnoreCase(chosenClubName))
+                    .findFirst()
+                    .orElse(chosenClubName);
 
-    private String promptForCountryCode(Scanner scan, Set<String> existingCountryCodes) {
-        System.out.println("Enter fighter's country code. " + Messages.TYPE_LIST_CCODE);
+            boolean createNewClub = false;
 
-        while(true) {
-            System.out.println("> ");
-            String input = scan.nextLine().trim().toUpperCase();
+            boolean clubExists = clubNames.stream()
+                    .anyMatch(name -> name.equalsIgnoreCase(normalizedClubName));
 
-            if (input.equals("LIST")) {
-                System.out.println("Available country codes:");
-                existingCountryCodes.forEach(code -> System.out.println(" - " + code));
-            } else if (existingCountryCodes.contains(input)) {
-                System.out.println("Country code '" + input + "' selected.");
-                return input;
-            } else {
-                if (!input.matches("[A-Z]{3}")) {
-                    System.out.println(Messages.INVALID_CCODE + "Must be 3 uppercase letters.");
-                    continue;
+            if (clubExists) {
+                Set<String> existingCity = clubsInCitiesRepository.getCityCodeByClubName(normalizedClubName);
+
+                if (existingCity == null || !existingCity.contains(chosenCityCode)) {
+                    createNewClub = true; //
+                } else {
+                    System.out.println("A club with this name already exists in this city. Do you want to create a NEW club with different details (Y/N)?");
+                    String answer = scan.nextLine().trim().toUpperCase();
+                    if (answer.equals("Y")) createNewClub = true;
                 }
-                return input;
-            }
-        }
-
-    }
-    private Country createNewCountry(Scanner scan, String code) {
-        System.out.println("Country code not found. Lets add new country. ");
-
-        System.out.println("Enter country name: ");
-        String name = scan.nextLine().trim();
-
-        System.out.println("Enter country population (number): ");
-        long population = readPositiveLong(scan);
-
-        System.out.println("Enter country surface area (number): ");
-        long area = readPositiveLong(scan);
-
-        return new Country(code, name, population, area);
-
-    }
-    private long readPositiveLong(Scanner scan) {
-        while (true) {
-            try {
-                long value = Long.parseLong(scan.nextLine().trim());
-                if (value > 0 ) return value;
-                System.out.println("Value must be a positive number. Try again.");
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid number. Try again");
-            }
-        }
-    }
-
-    private void saveNewCountry(Country country) {
-        try{
-            countryRepository.insertCountries(List.of(country));
-            System.out.println("New country added to database.");
-        } catch (SQLException e) {
-            System.out.println("Error adding new country to database: " + e.getMessage());
-        }
-        try {
-            fileHandler.appendCountryToFile("country.txt", country);
-            System.out.println("New country added to file country.txt.");
-        } catch (IOException e) {
-            System.out.println("Error writing new country to file country.txt: " + e.getMessage());
-        }
-    }
-    private String promptForCityCode(Scanner scan, Set<String> existingCityCodes) {
-        System.out.println("Enter fighter's city code. " + Messages.TYPE_LIST_CCODE);
-
-        while(true) {
-            System.out.println("> ");
-            String input = scan.nextLine().trim().toUpperCase();
-
-            if (input.equals("LIST")) {
-                System.out.println("Available country codes:");
-                existingCityCodes.forEach(code -> System.out.println(" - " + code));
-            } else if (existingCityCodes.contains(input)) {
-                System.out.println("city code '" + input + "' selected.");
-                return input;
             } else {
-                if (!input.matches("[A-Z]{3}")) {
-                    System.out.println(Messages.INVALID_CICODE + "Must be 3 uppercase letters.");
-                    continue;
-                }
-                return input;
+                createNewClub = true;
             }
-        }
-    }
 
-    private City createNewCity(Scanner scan, String codeCity, String codeCountry) {
-        System.out.println("City code not found. Lets add new city. ");
+            if (createNewClub) {
+                ThaiboxingClubAdmin newClub = menuUtils.createNewClub(scan, normalizedClubName);
+                menuUtils.saveNewClub(newClub);
+                clubNames.add(normalizedClubName);
+            }
 
-        System.out.println("Enter city name: ");
-        String nameCity = scan.nextLine().trim();
+            Integer idClub;
 
-        System.out.println("Enter city population (number): ");
-        long population = readPositiveLong(scan);
+            if (createNewClub) {
+                idClub = thaiClubRepository.getLastInsertedIdByName(normalizedClubName);
+            } else {
+                idClub = menuUtils.selectSpecificClub(scan, normalizedClubName, chosenCityCode);
+                if (idClub == null) {
+                    System.out.println("Could not select club. returning to menu.");
+                    return;
+                }
+            }
 
-        System.out.println("Enter city surface area (number): ");
-        long area = readPositiveLong(scan);
+            fileHandler.appendClubCityToFile("club_city.txt", idClub.toString(), chosenCityCode);
+            clubsInCitiesRepository.insertClubsInCities(idClub, chosenCityCode);
 
-        return new City (codeCity, nameCity, population, area, codeCountry);
+            FighterDb newFighter = menuUtils.createNewFighter(scan, idClub, chosenCountryCode);
+            menuUtils.saveNewFighter(newFighter, normalizedClubName);
 
-    }
-    private void saveNewCity(City city) {
-        try{
-            cityRepository.insertCitiesAdmin(List.of(city));
-            System.out.println("New city added to database.");
-        } catch (SQLException e) {
-            System.out.println("Error adding new city to database: " + e.getMessage());
-        }
-
-        try {
-            String fileName = "cities_" + city.codeCountry() + ".txt";
-            fileHandler.appendCityToFile(fileName, city);
-            System.out.println("New city added to file " +  fileName);
         } catch (IOException e) {
-            System.out.println("Error writing city fo file: " + e.getMessage());
-
+            System.out.println("Error reading reqiured data files " + e.getMessage());
+        } catch (SQLException e) {
+            System.out.println("Error inserting data to database" + e.getMessage());
         }
     }
+
+
 }

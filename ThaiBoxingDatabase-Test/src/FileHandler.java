@@ -2,8 +2,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -48,7 +50,7 @@ public class FileHandler {
 
     public List<String> getAllCityFiles(String directory) {
         File dir = new File(directory);
-        File[] files = dir.listFiles((d, name) -> name.startsWith("cities_") && name.endsWith(".txt") );
+        File[] files = dir.listFiles((d, name) -> name.startsWith("cities_") && name.endsWith(".txt"));
 
         List<String> fileNames = new ArrayList<>();
         if (files != null) {
@@ -119,9 +121,9 @@ public class FileHandler {
         Set<String> codes = new TreeSet<>();
 
         for (String file : fileNames) {
-                List<City> cities = readCitiesFromFile(file);
-                cities.forEach(city -> codes.add(city.codeCity()));
-            }
+            List<City> cities = readCitiesFromFile(file);
+            cities.forEach(city -> codes.add(city.codeCity()));
+        }
         return codes;
     }
 
@@ -149,6 +151,7 @@ public class FileHandler {
             writer.newLine();
         }
     }
+
     public void appendCityToFile(String fileName, City city) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
             writer.write(city.codeCity());
@@ -163,6 +166,52 @@ public class FileHandler {
             writer.newLine();
             writer.write("-----");
             writer.newLine();
+        }
+    }
+
+    public void appendThaiClubToFile(String fileName, ThaiboxingClubAdmin club) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
+            writer.write(club.clubName());
+            writer.newLine();
+            writer.write(club.address());
+            writer.newLine();
+            writer.write(club.email());
+            writer.newLine();
+            writer.write(club.phone());
+            writer.newLine();
+            writer.write(Integer.toString(club.establishedYear()));
+            writer.newLine();
+            writer.write(club.owner());
+            writer.newLine();
+            writer.write("-----");
+            writer.newLine();
+        }
+    }
+
+    public void appendClubCityToFile(String fileName, String idClub, String codeCity) throws IOException {
+        String line = idClub.trim() + ";" + codeCity + System.lineSeparator();
+        Files.write(Paths.get(fileName), line.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+    }
+
+    public void appendFighterToFile(String fileName, FighterDb fighterDb, String clubName) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
+            writer.write(fighterDb.fighterName());
+            writer.newLine();
+            writer.write(fighterDb.fighterStyle());
+            writer.newLine();
+            writer.write(Integer.toString(fighterDb.heightInCm()));
+            writer.newLine();
+            writer.write(Integer.toString(fighterDb.weightInKg()));
+            writer.newLine();
+            writer.write(fighterDb.age().toString());
+            writer.newLine();
+            writer.write(fighterDb.codeCountry());
+            writer.newLine();
+            writer.write(clubName);
+            writer.newLine();
+            writer.write("-----");
+            writer.newLine();
+
         }
     }
 }

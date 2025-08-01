@@ -12,15 +12,15 @@ public class Menu {
     private CityRepository cityRepository;
 
 
-    public Menu(FighterRepository fighterRepository, ThaiClubRepository thaiClubRepository, CityRepository cityRepository, CountryRepository countryRepository, ClubsInCitiesRepository clubsInCitiesRepository) {
-        this.fileHandler = new FileHandler();
+    public Menu(FileHandler fileHandler, FighterRepository fighterRepository, ThaiClubRepository thaiClubRepository, CityRepository cityRepository, CountryRepository countryRepository, ClubsInCitiesRepository clubsInCitiesRepository) {
+        this.fileHandler = fileHandler;
         this.fighterRepository = fighterRepository;
         this.thaiClubRepository = thaiClubRepository;
         this.cityRepository = cityRepository;
         this.countryRepository = countryRepository;
         this.clubsInCitiesRepository = clubsInCitiesRepository;
-    }
 
+    }
 
     public void menu() throws IOException, SQLException {
         Scanner scan = new Scanner(System.in);
@@ -30,7 +30,7 @@ public class Menu {
             System.out.println("\n1. Show all fighters in a country");
             System.out.println("2. Show all fighters in a thaiboxing Club");
             System.out.println("3. Show all thaiboxing clubs in a City");
-            System.out.println("4. Show what cities thaiboxing clubs are located");
+            System.out.println("4. Show which cities thaiboxing clubs are located");
             System.out.println("5. Admin menu");
             System.out.println("6. Exit");
             System.out.println("Your choice: ");
@@ -59,15 +59,15 @@ public class Menu {
         try {
             String correctPassword = fileHandler.readAdminPassword("admin.properties");
 
-        System.out.println("Enter admin password: ");
-        String input = scan.nextLine();
+            System.out.println("Enter admin password: ");
+            String input = scan.nextLine();
 
-        if (input.equals(correctPassword)) {
-            AdminMenu adminMenu = new AdminMenu(fighterRepository, thaiClubRepository, cityRepository, countryRepository, clubsInCitiesRepository, fileHandler);
-            adminMenu.start(scan);
-        } else {
-            System.out.println("Incorrect password. Please try again.");
-        }
+            if (input.equals(correctPassword)) {
+                AdminMenu adminMenu = new AdminMenu(fighterRepository, thaiClubRepository, cityRepository, countryRepository, clubsInCitiesRepository, fileHandler);
+                adminMenu.start(scan);
+            } else {
+                System.out.println("Incorrect password. Please try again.");
+            }
 
         } catch (IOException e) {
             System.out.println("Error reading password file " + e.getMessage());
@@ -89,18 +89,25 @@ public class Menu {
                     clubNames.forEach(name -> System.out.println(" - " + name));
                 } else if (clubNames.contains(input)) {
                     System.out.println("You selected club: " + input);
-                    Integer id = thaiClubRepository.getIdClubByName(input);
-                    if (id == null) {
+                    List<Integer> ids = thaiClubRepository.getAllIdClubsByName(input);
+                    if (ids.isEmpty()) {
                         System.out.println("Club not found: " + input);
                         return;
                     }
-                    List<City> cities = cityRepository.getCitiesByIDClub(id);
-                    if (cities.isEmpty()) {
+
+                    Set<City> allCities = new HashSet<>();
+                    for (Integer id : ids) {
+                        List<City> cities = cityRepository.getCitiesByIDClub(id);
+                        allCities.addAll(cities);
+                    }
+                    if (allCities.isEmpty()) {
                         System.out.println("No cities found for club: " + input);
                     } else {
-                        cities.forEach(city -> System.out.println(" - " + city));
+                        System.out.println("Club '" + input + "' is located in these cities:");
+                        allCities.forEach(city -> System.out.println(" - " + city.nameCity() + " (" + city.codeCity() + ")"));
                     }
                     break;
+
                 } else {
                     System.out.println("Invalid club name. " + Messages.TYPE_LIST_CLUB_NAMES);
                 }
@@ -116,7 +123,7 @@ public class Menu {
         try {
             List<String> cityFiles = fileHandler.getAllCityFiles(".");
             Set<String> codeCities = fileHandler.getAllCityCodes(cityFiles.toArray(new String[0]));
-            System.out.println("Please enter city code. " + Messages.TYPE_LIST_CCODE);
+            System.out.println("Please enter city code. " + Messages.TYPE_LIST_CICODES);
 
             while (true) {
                 System.out.print("> ");
@@ -139,9 +146,9 @@ public class Menu {
                         System.out.println("Error getting clubs from database: " + e.getMessage());
                     }
 
-                    break; // flyttet riktig: etter databasekallet
+                    break;
                 } else {
-                    System.out.println("Invalid city code. " + Messages.TYPE_LIST_CCODE);
+                    System.out.println("Invalid city code. " + Messages.TYPE_LIST_CICODES);
                 }
             }
         } catch (IOException e) {
@@ -169,35 +176,34 @@ public class Menu {
                     } else {
                         fighters.forEach(f -> System.out.println(f.toString()));
                     }
-                    break; // Viktig: kun break når man faktisk har funnet en gyldig klubb
+                    break;
                 } else {
                     System.out.println("Invalid club name. " + Messages.TYPE_LIST_CLUB_NAMES);
                 }
             }
         } catch (IOException e) {
             System.out.println("Error reading file thaiboxingClubs.txt  " + e.getMessage());
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             System.out.println("Error getting fighters from database: " + e.getMessage());
         }
     }
 
 
     private void showAllFightersInCountry(Scanner scan) {
-        try{
-        Set<String> codeCountry = fileHandler.getAllCountryCodes("country.txt");
-        System.out.println("Please enter the country code. " + Messages.TYPE_LIST_CCODE);
-        while (true) {
-            System.out.print("> ");
-            String input = scan.nextLine().trim().toUpperCase();
+        try {
+            Set<String> codeCountry = fileHandler.getAllCountryCodes("country.txt");
+            System.out.println("Please enter the country code. " + Messages.TYPE_LIST_COCODES);
+            while (true) {
+                System.out.print("> ");
+                String input = scan.nextLine().trim().toUpperCase();
 
-            if (input.equals("LIST")) {
-                System.out.println("Available country codes:");
-                for (String code : codeCountry) {
-                    System.out.println(" - " + code);
-                }
-            } else if (codeCountry.contains(input)) {
-                System.out.println("You selected country code: " + input);
+                if (input.equals("LIST")) {
+                    System.out.println("Available country codes:");
+                    for (String code : codeCountry) {
+                        System.out.println(" - " + code);
+                    }
+                } else if (codeCountry.contains(input)) {
+                    System.out.println("You selected country code: " + input);
 
                     List<FighterDb> fighters = fighterRepository.getFightersByCountryCode(input);
                     if (fighters.isEmpty()) {
@@ -207,8 +213,8 @@ public class Menu {
                     }
                     break;
                 } else {
-                System.out.println(Messages.INVALID_CCODE + Messages.TYPE_LIST_CCODE);
-             }
+                    System.out.println(Messages.INVALID_CCODE + Messages.TYPE_LIST_COCODES);
+                }
             }
         } catch (SQLException e) {
             System.out.println("Error getting fighters from database: " + e.getMessage());

@@ -10,14 +10,14 @@ import java.util.Properties;
 public class ConnectToDatabase {
     private Connection con;
 
-    public Connection getCon(){
+    public Connection getCon() {
         return con;
     }
 
     public void connectToDatabase() throws IOException, SQLException {
         Properties props = new Properties();
 
-        try (FileInputStream fis = new FileInputStream("db.properties")){
+        try (FileInputStream fis = new FileInputStream("db.properties")) {
             props.load(fis);
 
             MysqlDataSource dataSource = new MysqlDataSource();

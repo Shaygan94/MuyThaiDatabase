@@ -34,68 +34,93 @@ public class ApplicationInitializer {
     }
 
     private void initializeRepositories() {
+        this.fileHandler = new FileHandler();
         this.countryRepository = new CountryRepository(connection);
         this.cityRepository = new CityRepository(connection);
         this.thaiClubRepository = new ThaiClubRepository(connection);
         this.clubsInCitiesRepository = new ClubsInCitiesRepository(connection);
         this.fighterRepository = new FighterRepository(connection);
-        this.fileHandler = new FileHandler();
+
     }
 
     private void loadCountries() throws IOException, SQLException {
         List<Country> countries = fileHandler.readCountriesFromFile("country.txt");
-        countryRepository.insertCountries(countries);
-        System.out.println("Successfully inserted countries from file country.txt");
+        if (countries.isEmpty()) {
+            System.out.println("No countries found in country.txt - file is empty");
+        } else {
+            countryRepository.insertCountries(countries);
+            System.out.println("Successfully inserted " + countries.size() + " countries from file country.txt");
+        }
     }
 
     private void loadCities() throws IOException, SQLException {
         List<String> cityFiles = fileHandler.getAllCityFiles(".");
 
-      for (String file : cityFiles) {
-          String code = file.replace("cities_", "").replace(".txt", "");
-          List<City> cities = fileHandler.readCitiesFromFile(file);
-          cityRepository.insertCities(cities, code);
-          System.out.println("Succesfully inserted cities from file " + file + ".");
-      }
-    }
-    //Finne en måte slik at metoden i adminmeny addnewfighter kan lese alle cityCodes.
+        if (cityFiles.isEmpty()) {
+            System.out.println("No city files found.");
+            return;
+        }
 
-    private void loadThaiClubs() throws IOException, SQLException {
-        List<ThaiboxingClub> thaiClubs = fileHandler.readThaiClubsFromFile("thaiboxingClubs.txt");
-        thaiClubRepository.insertThaiClubs(thaiClubs);
-        System.out.println("Successfully inserted thaiboxingClubs from file thaiboxingClubs.txt");
-    }
-
-    private void linkClubsToCities() throws IOException, SQLException {
-        List<String> lines = Files.readAllLines(Paths.get("club_city.txt"));
-        for (String line : lines) {
-            String[] parts = line.split(";");
-            if (parts.length == 2) {
-                String clubName = parts[0].trim();
-                String cityName = parts[1].trim();
-                insertClubInCityByName(clubName, cityName);
+        for (String file : cityFiles) {
+            String code = file.replace("cities_", "").replace(".txt", "");
+            List<City> cities = fileHandler.readCitiesFromFile(file);
+            if (cities.isEmpty()) {
+                System.out.println("No cities found in file " + file + " - file is empty.");
+            } else {
+                cityRepository.insertCities(cities, code);
+                System.out.println("Successfully inserted " + cities.size() + " cities from file " + file + ".");
             }
         }
     }
-    private void insertClubInCityByName(String clubName, String cityName) throws SQLException {
-        Integer idClub = thaiClubRepository.getIdClubByName(clubName);
-        String codeCity = cityRepository.getCodeCityByName(cityName);
 
-        if (idClub == null) {
-            System.out.println("Club not found: " + clubName);
+    private void loadThaiClubs() throws IOException, SQLException {
+        List<ThaiboxingClub> thaiClubs = fileHandler.readThaiClubsFromFile("thaiboxingClubs.txt");
+        if (thaiClubs.isEmpty()) {
+            System.out.println("No thaiboxing clubs found in thaiboxingClubs.txt - file is empty.");
+        } else {
+            thaiClubRepository.insertThaiClubs(thaiClubs);
+            System.out.println("Successfully inserted " + thaiClubs.size() + " thaiboxing clubs from file thaiboxingClubs.txt");
+        }
+    }
+
+
+    private void linkClubsToCities() throws IOException, SQLException {
+        List<String> lines = Files.readAllLines(Paths.get("club_city.txt"));
+        if (lines.isEmpty()) {
+            System.out.println("No club-city links found in club_city.txt - file is empty.");
             return;
         }
-        if (codeCity == null) {
-            System.out.println("City not found: " + cityName);
-            return;
-        }
 
-        clubsInCitiesRepository.insertClubsInCities(idClub, codeCity);
-        System.out.println("Inserted: " + clubName + " in " + cityName);
+        int insertedCount = 0;
+        for (String line : lines) {
+            String[] parts = line.split(";");
+            if (parts.length == 2) {
+                int idClub;
+                try {
+                    idClub = Integer.parseInt(parts[0].trim());
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid club id format: " + parts[0]);
+                    continue;
+                }
+                String codeCity = parts[1].trim();
+
+                clubsInCitiesRepository.insertClubsInCities(idClub, codeCity);
+                System.out.println("Inserted club (id=" + idClub + ") into city (code=" + codeCity + ")");
+                insertedCount++;
+            }
+        }
+        if (insertedCount == 0) {
+            System.out.println("No valid club-city links processed from club_city.txt");
+        }
     }
 
     private void loadFighters() throws IOException, SQLException {
         List<Fighter> fighters = fileHandler.readFightersFromFile("fighters.txt");
+        if (fighters.isEmpty()) {
+            System.out.println("No fighters found in fighters.txt - file is empty.");
+            return;
+        }
+
         List<FighterDb> fightersForDb = new ArrayList<>();
 
         for (Fighter f : fighters) {
@@ -120,22 +145,34 @@ public class ApplicationInitializer {
             }
         }
 
-        fighterRepository.insertFighters(fightersForDb);
-        System.out.println("Successfully inserted fighters from fighters.txt");
+        if (fightersForDb.isEmpty()) {
+            System.out.println("No valid fighters processed from fighters.txt");
+        } else {
+            fighterRepository.insertFighters(fightersForDb);
+            System.out.println("Successfully inserted " + fightersForDb.size() + " fighters from fighters.txt");
+        }
+    }
+
+    public FileHandler getFileHandler() {
+        return this.fileHandler;
     }
 
     public FighterRepository getFighterRepository() {
         return this.fighterRepository;
     }
+
     public ThaiClubRepository getThaiClubRepository() {
         return this.thaiClubRepository;
     }
+
     public CityRepository getCityRepository() {
         return this.cityRepository;
     }
+
     public CountryRepository getCountryRepository() {
         return this.countryRepository;
     }
+
     public ClubsInCitiesRepository getClubsInCitiesRepository() {
         return this.clubsInCitiesRepository;
     }
