@@ -1,12 +1,11 @@
 # MuyThaiDatabase
 
-A personal Java project inspired by the 2025 Java exam. It manages Muay Thai fighters, clubs, cities, and countries with file and database integration, featuring an admin menu for secure data management and input validation.
-
+A personal Java project inspired by the 2025 Java exam. It manages Muay Thai fighters, clubs, cities, and countries with file and database integration.
 ---
 
 ## 📄 About
 
-The application reads and writes data related to Thai boxing: countries, cities, Muay Thai clubs, and fighters. It supports adding new entries interactively via an Admin Menu that updates existing text files or creates new ones as needed to persist the data.
+The application reads and writes data related to Thai boxing: countries, cities, Muay Thai clubs, and fighters. It supports adding new entries interactively via an Admin Menu that **simultaneously updates both the MySQL database tables and corresponding text files** to maintain data persistence across both storage methods.
 
 The backend uses JDBC to connect to a MySQL database, leveraging a structured relational schema with proper keys and constraints. The project is built with Maven for dependency management and uses the MySQL Connector/J version 8.0.30 for database connectivity.
 
