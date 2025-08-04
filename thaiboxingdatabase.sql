@@ -1,9 +1,13 @@
--- MySQL dump 10.13  Distrib 8.0.38, for Win64 (x86_64)
---
--- Host: localhost    Database: thaiboxingdatabase
--- ------------------------------------------------------
--- Server version	8.0.39
+-- ===============================================
+-- ThaiboxingDatabase - Complete Setup Script
+-- ===============================================
 
+-- Create database if it doesn't exist
+DROP DATABASE IF EXISTS thaiboxingdatabase;
+CREATE DATABASE thaiboxingdatabase;
+USE thaiboxingdatabase;
+
+-- Set MySQL configuration
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
@@ -15,9 +19,25 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
---
+-- ===============================================
+-- Table structure for table `country`
+-- ===============================================
+
+DROP TABLE IF EXISTS `country`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `country` (
+  `codeCountry` varchar(3) NOT NULL,
+  `nameCountry` varchar(45) DEFAULT NULL,
+  `populationCountry` bigint DEFAULT NULL,
+  `surfaceAreaCountry` bigint DEFAULT NULL,
+  PRIMARY KEY (`codeCountry`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+-- ===============================================
 -- Table structure for table `city`
---
+-- ===============================================
 
 DROP TABLE IF EXISTS `city`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -34,9 +54,29 @@ CREATE TABLE `city` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
+-- ===============================================
+-- Table structure for table `thaiboxingclub`
+-- ===============================================
+
+DROP TABLE IF EXISTS `thaiboxingclub`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `thaiboxingclub` (
+  `idClub` int NOT NULL AUTO_INCREMENT,
+  `clubName` varchar(45) DEFAULT NULL,
+  `address` varchar(100) DEFAULT NULL,
+  `email` varchar(50) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `EstablishedYear` year DEFAULT NULL,
+  `Owner` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`idClub`),
+  UNIQUE KEY `unique_club` (`clubName`,`address`)
+) ENGINE=InnoDB AUTO_INCREMENT=1000 DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+-- ===============================================
 -- Table structure for table `clubs_in_cities`
---
+-- ===============================================
 
 DROP TABLE IF EXISTS `clubs_in_cities`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -51,25 +91,9 @@ CREATE TABLE `clubs_in_cities` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Table structure for table `country`
---
-
-DROP TABLE IF EXISTS `country`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `country` (
-  `codeCountry` varchar(3) NOT NULL,
-  `nameCountry` varchar(45) DEFAULT NULL,
-  `populationCountry` bigint DEFAULT NULL,
-  `surfaceAreaCountry` bigint DEFAULT NULL,
-  PRIMARY KEY (`codeCountry`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
+-- ===============================================
 -- Table structure for table `fighter`
---
+-- ===============================================
 
 DROP TABLE IF EXISTS `fighter`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -89,30 +113,14 @@ CREATE TABLE `fighter` (
   KEY `fk_fighter_country` (`codeCountry`),
   CONSTRAINT `fk_fighter_country` FOREIGN KEY (`codeCountry`) REFERENCES `country` (`codeCountry`),
   CONSTRAINT `fk_Fighter_ThaiboxingClub1` FOREIGN KEY (`IdClub`) REFERENCES `thaiboxingclub` (`idClub`)
-) ENGINE=InnoDB AUTO_INCREMENT=144 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Table structure for table `thaiboxingclub`
---
+-- ===============================================
+-- Restore MySQL settings
+-- ===============================================
 
-DROP TABLE IF EXISTS `thaiboxingclub`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `thaiboxingclub` (
-  `idClub` int NOT NULL AUTO_INCREMENT,
-  `clubName` varchar(45) DEFAULT NULL,
-  `address` varchar(100) DEFAULT NULL,
-  `email` varchar(50) DEFAULT NULL,
-  `phone` varchar(20) DEFAULT NULL,
-  `EstablishedYear` year DEFAULT NULL,
-  `Owner` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`idClub`),
-  UNIQUE KEY `unique_club` (`clubName`,`address`)
-) ENGINE=InnoDB AUTO_INCREMENT=1296 DEFAULT CHARSET=utf8mb3;
-/*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
-
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
@@ -121,4 +129,8 @@ CREATE TABLE `thaiboxingclub` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-07-22 19:39:29
+-- Script completed successfully!
+-- Database 'thaiboxingdatabase' created with:
+-- - Fighter IDs starting from 1
+-- - Club IDs starting from 1000
+-- - All foreign key relationships intact
